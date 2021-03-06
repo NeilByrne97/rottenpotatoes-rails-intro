@@ -8,8 +8,30 @@ class MoviesController < ApplicationController
 
   def index
     @movies = Movie.all
+    @all_ratings = Movie.all_ratings
+    check_consistency()
+    @selected_rating = (params[:ratings] || Hash[@all_ratings.product([1])]).keys
+    
+    @header_classes = {'title': '', 'release_date': ''}
+    @header_classes[params[:sort]] = 'hilite'
+    
+   @movies = Movie.where(rating: @selected_rating).order(params[:sort])
   end
-
+  
+  def check_consistency
+    # Session
+    [:ratings, :sort].each {|key|
+      if params[key] && (session[key].nil? || (session[key] != params[key]))
+        session[key] = params[key]
+      end
+    }
+    # Params
+    if (session[:sort] && params[:sort].nil?) || (session[:ratings] && params[:ratings].nil?)
+        redirect_to movies_path(ratings: session[:ratings], sort: session[:sort])
+    end
+  end
+  
+  
   def new
     # default: render 'new' template
   end
