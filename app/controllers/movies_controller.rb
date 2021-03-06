@@ -11,21 +11,21 @@ class MoviesController < ApplicationController
     @all_ratings = Movie.all_ratings
     check_consistency()
     @selected_rating = (params[:ratings] || Hash[@all_ratings.product([1])]).keys
-
-     sort = params[:sort] || session[:sort]
+    
+    # Highlight sort
+    sort = params[:sort] || session[:sort]
     case sort
-    when 'title'
-      ordering,@title = {:order => :title}, 'bg-warning hilite'
-    when 'release_date'
-      ordering,@release_date = {:order => :release_date}, 'bg-warning hilite'
+      when 'title'
+        ordering,@title = {:order => :title}, 'bg-warning hilite'
+      when 'release_date'
+        ordering,@release_date = {:order => :release_date}, 'bg-warning hilite'
     end
-    
-    
+    # Sort
    @movies = Movie.where(rating: @selected_rating).order(params[:sort])
        
   end
   
-  def check_consistency
+  def check_consistency # Remeber sorts when moving through pages
     # Session
     [:ratings, :sort].each {|key|
       if params[key] && (session[key].nil? || (session[key] != params[key]))
